@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
+      http://www.springframework.org/schema/security 
+      http://www.springframework.org/schema/security/spring-security-3.2.xsd
+      http://www.springframework.org/schema/beans 
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<!-- Rest authentication entry point configuration -->
+	<http use-expressions="true"  create-session="stateless" entry-point-ref="customAuthenticationEntryPoint" authentication-manager-ref="authenticationManager">
+		<!-- <intercept-url pattern="/api/api-docs**" access="permitAll" />
+	<intercept-url pattern="/api/api-docs/**" access="permitAll" />
+		<intercept-url pattern="/api/**" access="isAuthenticated()" /> -->
+		<intercept-url pattern="/api/**" access="permitAll" />
+			<sec:form-login authentication-success-handler-ref="mySuccessHandler" />
+			<sec:access-denied-handler ref="accessDeniedHandler" />
+		 <http-basic />
+	</http>
+
+
+	<!-- Entry point for REST service. -->
+	<beans:bean id="customAuthenticationEntryPoint"
+		class="com.glenwood.glaceemr.server.application.Bean.CustomAuthenticationEntryPoint">
+	</beans:bean>
+	
+	<!-- Custom User details service which is provide the user data -->
+	<beans:bean id="customUserDetailsService"
+			class="com.glenwood.glaceemr.server.application.Bean.CustomUserDetailsService" />
+
+	<!-- Connect the custom authentication success handler -->
+	<beans:bean id="mySuccessHandler"
+			class="com.glenwood.glaceemr.server.application.Bean.CustomAuthenticationSuccessHandler" />
+
+	<!-- Using Authentication Access Denied handler -->
+	<beans:bean id="accessDeniedHandler"
+		class="com.glenwood.glaceemr.server.application.Bean.CustomAccessDeniedHandler">
+		<beans:property name="errorPage" value="/api/login/accessDenied" />
+	</beans:bean>
+	
+	<!-- Authentication manager -->
+	<!-- <authentication-manager alias="authenticationManager">
+			<authentication-provider user-service-ref="customUserDetailsService">
+			</authentication-provider>
+		</authentication-manager> -->
+	
+<authentication-manager alias="authenticationManager">
+			 <authentication-provider ref="customAuthenticationProvider" />
+		</authentication-manager> 
+	<!-- Enable the annotations for defining the secure role -->
+	<global-method-security secured-annotations="enabled" />
+	
+	
+	<beans:bean id="customAuthenticationProvider" class="com.glenwood.glaceemr.server.application.Bean.CustomAuthenticationProvider">
+
+    <beans:property name="userDetailsService" ref="customUserDetailsService" />
+</beans:bean>
+
+
+</beans:beans>
